@@ -138,15 +138,6 @@ export default {
 		localeTargets: 'any',
 		allowExistingUsers: true,
 	},
-	showBusinessPlanBump: {
-		datestamp: '20300619',
-		variations: {
-			variantShowPlanBump: 0,
-			control: 100,
-		},
-		defaultVariation: 'control',
-		allowExistingUsers: true,
-	},
 	showCompositeCheckoutI18N: {
 		datestamp: '20200710',
 		variations: {

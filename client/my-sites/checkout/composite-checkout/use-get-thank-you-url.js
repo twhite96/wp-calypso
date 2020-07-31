@@ -215,7 +215,7 @@ function getFallbackDestination( {
 	return '/';
 }
 
-function maybeShowPlanBumpOfferConcierge( {
+function maybeShowPlanBumpOffer( {
 	pendingOrReceiptId,
 	cart,
 	siteSlug,
@@ -223,10 +223,7 @@ function maybeShowPlanBumpOfferConcierge( {
 	isTransactionResultEmpty,
 } ) {
 	if ( hasPremiumPlan( cart ) && ! isTransactionResultEmpty && ! didPurchaseFail ) {
-		if ( 'variantShowPlanBump' === abtest( 'showBusinessPlanBump' ) ) {
-			return `/checkout/${ siteSlug }/offer-plan-upgrade/business/${ pendingOrReceiptId }`;
-		}
-		return `/checkout/offer-quickstart-session/${ pendingOrReceiptId }/${ siteSlug }`;
+		return `/checkout/${ siteSlug }/offer-plan-upgrade/business/${ pendingOrReceiptId }`;
 	}
 
 	return;
@@ -255,7 +252,7 @@ function getRedirectUrlForConciergeNudge( {
 		// A user just purchased one of the qualifying plans
 		// Show them the concierge session upsell page
 
-		const upgradePath = maybeShowPlanBumpOfferConcierge( {
+		const upgradePath = maybeShowPlanBumpOffer( {
 			pendingOrReceiptId,
 			cart,
 			siteSlug,
