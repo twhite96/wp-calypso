@@ -26,6 +26,7 @@ export default function WPCheckoutOrderReview( {
 	onChangePlanLength,
 	siteUrl,
 	isSummary,
+	isPwpoUser,
 } ) {
 	const translate = useTranslate();
 	const [ items, total ] = useLineItems();
@@ -55,6 +56,7 @@ export default function WPCheckoutOrderReview( {
 					getItemVariants={ getItemVariants }
 					onChangePlanLength={ onChangePlanLength }
 					isSummary={ isSummary }
+					isPwpoUser={ isPwpoUser }
 				/>
 			</WPOrderReviewSection>
 

@@ -100,6 +100,7 @@ export default function WPCheckout( {
 	isCartPendingUpdate,
 	showErrorMessageBriefly,
 	infoMessage,
+	isPwpoUser,
 } ) {
 	const translate = useTranslate();
 	const couponFieldStateProps = useCouponFieldState( submitCoupon );
@@ -256,6 +257,7 @@ export default function WPCheckout( {
 							variantSelectOverride={ variantSelectOverride }
 							getItemVariants={ getItemVariants }
 							siteUrl={ siteUrl }
+							isPwpoUser={ isPwpoUser }
 						/>
 					}
 					titleContent={ <OrderReviewTitle /> }

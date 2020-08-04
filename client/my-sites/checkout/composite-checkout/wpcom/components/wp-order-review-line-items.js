@@ -32,6 +32,7 @@ function WPLineItem( {
 	getItemVariants,
 	onChangePlanLength,
 	isSummary,
+	isPwpoUser,
 } ) {
 	const translate = useTranslate();
 	const hasDomainsInCart = useHasDomainsInCart();
@@ -39,7 +40,7 @@ function WPLineItem( {
 	const itemSpanId = `checkout-line-item-${ item.id }`;
 	const deleteButtonId = `checkout-delete-button-${ item.id }`;
 	const [ isModalVisible, setIsModalVisible ] = useState( false );
-	const modalCopy = returnModalCopy( item.type, translate, hasDomainsInCart );
+	const modalCopy = returnModalCopy( item.type, translate, hasDomainsInCart, isPwpoUser );
 	const onEvent = useEvents();
 	const isDisabled = formStatus !== 'ready';
 
@@ -289,6 +290,7 @@ export function WPOrderReviewLineItems( {
 	variantSelectOverride,
 	getItemVariants,
 	onChangePlanLength,
+	isPwpoUser,
 } ) {
 	return (
 		<WPOrderReviewList className={ joinClasses( [ className, 'order-review-line-items' ] ) }>
@@ -309,6 +311,7 @@ export function WPOrderReviewLineItems( {
 								getItemVariants={ getItemVariants }
 								onChangePlanLength={ onChangePlanLength }
 								isSummary={ isSummary }
+								isPwpoUser={ isPwpoUser }
 							/>
 						</WPOrderReviewListItem>
 					);
@@ -373,16 +376,20 @@ function GSuiteUsersList( { item } ) {
 	);
 }
 
-function returnModalCopy( product, translate, hasDomainsInCart ) {
+function returnModalCopy( product, translate, hasDomainsInCart, isPwpoUser ) {
 	const modalCopy = {};
 	const productType = product === 'plan' && hasDomainsInCart ? 'plan with dependencies' : product;
 
 	switch ( productType ) {
 		case 'plan with dependencies':
 			modalCopy.title = translate( 'You are about to remove your plan from the cart' );
-			modalCopy.description = translate(
-				'When you press Continue, we will remove your plan from the cart and your site will continue to run with its current plan. Since your other product(s) depend on your plan to be purchased, they will also be removed from the cart and we will take you back to your site.'
-			);
+			modalCopy.description = isPwpoUser
+				? translate(
+						'When you press Continue, we will remove your plan from the cart and your site will continue to run with its current plan.'
+				  )
+				: translate(
+						'When you press Continue, we will remove your plan from the cart and your site will continue to run with its current plan. Since your other product(s) depend on your plan to be purchased, they will also be removed from the cart and we will take you back to your site.'
+				  );
 			break;
 		case 'plan':
 			modalCopy.title = translate( 'You are about to remove your plan from the cart' );

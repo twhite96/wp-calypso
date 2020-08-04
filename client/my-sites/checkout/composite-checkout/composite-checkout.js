@@ -41,7 +41,7 @@ import {
 } from 'state/domains/management/actions';
 import QuerySitePurchases from 'components/data/query-site-purchases';
 import RegistrantExtraInfoForm from 'components/domains/registrant-extra-info';
-import { getCurrentUserCountryCode } from 'state/current-user/selectors';
+import { getCurrentUserCountryCode, currentUserHasFlag } from 'state/current-user/selectors';
 import { StateSelect } from 'my-sites/domains/components/form';
 import ManagedContactDetailsFormFields from 'components/domains/contact-details-form-fields/managed-contact-details-form-fields';
 import { getPlan } from 'lib/plans';
@@ -92,6 +92,7 @@ import useShoppingCartManager from './wpcom/hooks/use-shopping-cart-manager';
 import useShowAddCouponSuccessMessage from './wpcom/hooks/use-show-add-coupon-success-message';
 import useCountryList from './wpcom/hooks/use-country-list';
 import { colors } from '@automattic/color-studio';
+import { NON_PRIMARY_DOMAINS_TO_FREE_USERS } from 'state/current-user/constants';
 
 const debug = debugFactory( 'calypso:composite-checkout:composite-checkout' );
 
@@ -127,6 +128,9 @@ export default function CompositeCheckout( {
 	const translate = useTranslate();
 	const isJetpackNotAtomic = useSelector(
 		( state ) => isJetpackSite( state, siteId ) && ! isAtomicSite( state, siteId )
+	);
+	const isPwpoUser = useSelector( ( state ) =>
+		currentUserHasFlag( state, NON_PRIMARY_DOMAINS_TO_FREE_USERS )
 	);
 	const { stripe, stripeConfiguration, isStripeLoading, stripeLoadingError } = useStripe();
 	const isLoadingCartSynchronizer =
@@ -593,6 +597,7 @@ export default function CompositeCheckout( {
 						CheckoutTerms={ CheckoutTerms }
 						showErrorMessageBriefly={ showErrorMessageBriefly }
 						infoMessage={ infoMessage }
+						isPwpoUser={ isPwpoUser }
 					/>
 				</CheckoutProvider>
 			</CartProvider>
