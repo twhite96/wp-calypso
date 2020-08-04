@@ -87,6 +87,7 @@ function clearSite( siteId ) {
 	delete MediaListStore._media[ siteId ];
 	// Immutable equivalent to `delete MediaListStore._activeQueries[ siteId ].nextPageHandle`.
 	const { nextPageHandle, ...activeQueries } = MediaListStore._activeQueries[ siteId ] || {};
+	console.log( 'lsNext clearsite' );
 	MediaListStore._activeQueries[ siteId ] = {
 		...activeQueries,
 		isFetchingNextPage: false,
@@ -110,6 +111,8 @@ function updateActiveQueryStatus( siteId, status ) {
 }
 
 function getNextPageMetaFromResponse( response ) {
+	console.log( 'lsNext flux', response.meta );
+
 	return response && response.meta && response.meta.next_page ? response.meta.next_page : null;
 }
 

@@ -436,6 +436,19 @@ export const transientItems = withoutPersistence(
  */
 export const fetching = withoutPersistence( ( state = {}, action ) => {
 	switch ( action.type ) {
+		case MEDIA_SOURCE_CHANGE: {
+			const { siteId } = action;
+
+			const { nextPageHandle, ...nextSiteState } = state[ siteId ];
+
+			return {
+				...state,
+				[ siteId ]: {
+					...nextSiteState,
+					nextPage: false,
+				},
+			};
+		}
 		case MEDIA_REQUEST: {
 			const siteId = action.siteId;
 
@@ -485,10 +498,11 @@ export const fetching = withoutPersistence( ( state = {}, action ) => {
 		case MEDIA_SET_NEXT_PAGE_HANDLE: {
 			const { siteId, mediaRequestMeta } = action;
 
+			console.log( 'lsNext setnextpagehandle' );
 			return {
 				...state,
 				[ siteId ]: merge( {}, state[ siteId ], {
-					nextPageHandle: mediaRequestMeta?.next_page ?? null,
+					nextPageHandle: mediaRequestMeta?.next_page || null,
 				} ),
 			};
 		}
@@ -500,6 +514,7 @@ export const fetching = withoutPersistence( ( state = {}, action ) => {
 
 			if ( ! isEqual( query, state[ siteId ]?.query ) ) {
 				delete newState.nextPageHandle;
+				newState.nextPage = false;
 			}
 
 			return {

@@ -16,6 +16,8 @@ import passToChildren from 'lib/react-pass-to-children';
 import utils from './utils';
 import { setQuery } from 'state/media/actions';
 import { fetchNextMediaPage } from 'state/media/thunks';
+import hasNextMediaPage from 'state/selectors/has-next-media-page';
+import { reduxGetState } from 'lib/redux-bridge';
 
 function getStateData( siteId ) {
 	return {
@@ -99,6 +101,17 @@ export class MediaListData extends React.Component {
 	};
 
 	render() {
+		if ( this.state.mediaHasNextPage !== this.props.hasNextPage ) {
+			MediaListStore;
+
+			console.log( 'did not match!!!!' );
+			const debug = {
+				lsNextPageHandle: MediaListStore._activeQueries[ this.props.siteId ].nextPageHandle,
+				rdxNextPageHandle: reduxGetState().media.fetching[ this.props.siteId ].nextPageHandle,
+			};
+			console.log( debug );
+		}
+
 		return passToChildren(
 			this,
 			assign( {}, this.state, {
@@ -112,4 +125,9 @@ MediaListData.defaultProps = {
 	setQuery: () => {},
 };
 
-export default connect( null, { fetchNextMediaPage, setQuery } )( MediaListData );
+export default connect(
+	( state, { siteId } ) => ( {
+		hasNextPage: hasNextMediaPage( state, siteId ),
+	} ),
+	{ fetchNextMediaPage, setQuery }
+)( MediaListData );
