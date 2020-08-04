@@ -9,6 +9,7 @@ node_modules/
 !.eslintrc.js
 /client/server/devdocs/search-index.js
 /packages/calypso-codemods/tests
+/packages/wpcom.js/webapp/tests/mocha.js
 
 # Built packages
 /packages/*/dist/
