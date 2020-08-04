@@ -38,7 +38,7 @@
 		"prepare": "check-npm-client && transpile && copy-assets"
 	},
 	"dependencies": {
-		"lodash": "^4.17.15",
+		"lodash": "^4.17.19",
 		"prop-types": "^15.7.2",
 		"@babel/runtime": "^7.9.2"
 	},
