@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION="1.0.5"
+VERSION="1.0.9"
 
 BUILDER_IMAGE_NAME="automattic/wp-calypso-base"
 CI_IMAGE_NAME="automattic/wp-calypso-ci"
