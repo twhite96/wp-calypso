@@ -42,14 +42,23 @@ function chooseTerserEcmaVersion( browsers ) {
  */
 module.exports = ( options ) => {
 	let terserOptions = options.terserOptions || {};
+	const isDesktop = options.isDesktop || false;
+	const browsers = isDesktop ? [ 'last 2 Chrome versions' ] : supportedBrowsers;
 	terserOptions = {
-		ecma: chooseTerserEcmaVersion( supportedBrowsers ),
+		ecma: chooseTerserEcmaVersion( browsers ),
 		ie8: false,
-		safari10: supportedBrowsers.some(
-			( browser ) => browser.includes( 'safari 10' ) || browser.includes( 'ios_saf 10' )
-		),
+		mangle: true,
+		compress: ! isDesktop,
+		safari10: isDesktop
+			? false
+			: browsers.some(
+					( browser ) => browser.includes( 'safari 10' ) || browser.includes( 'ios_saf 10' )
+			  ),
 		...terserOptions,
 	};
+
+	// ensure we don't initialize Terser with convenience params
+	delete options.isDesktop;
 
 	return [ new TerserPlugin( { ...options, terserOptions } ) ];
 };

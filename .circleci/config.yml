@@ -32,10 +32,6 @@ references:
     environment:
       CONFIG_ENV: release
       NODE_ARGS: --max_old_space_size=6144
-      CALYPSO_DOCTOR_SKIP: true
-      CHROMEDRIVER_SKIP_DOWNLOAD: true
-      DETECT_CHROMEDRIVER_VERSION: 'false'
-      CHROMEDRIVER_FILEPATH: /usr/local/bin/chromedriver
 
   setup-results-and-artifacts: &setup-results-and-artifacts
     name: Create Directories for Results and Artifacts
@@ -228,11 +224,13 @@ references:
   desktop-restore-source-cache: &desktop-restore-source-cache
     name: Restore desktop cache
     keys:
-      - v6-desktop-{{ .Environment.CIRCLE_JOB }}-{{ .Environment.CIRCLE_SHA1 }}
+      - v6-desktop-{{ .Environment.CIRCLE_JOB }}-{{ checksum ".nvmrc" }}-{{ checksum "yarn.lock" }}
+      - v6-desktop-{{ .Environment.CIRCLE_JOB }}-{{ checksum ".nvmrc" }}
   desktop-save-source-cache: &desktop-save-source-cache
     name: Save desktop cache
-    key: v6-desktop-{{ .Environment.CIRCLE_JOB }}-{{ .Environment.CIRCLE_SHA1 }}
-    paths: *desktop-cache-paths
+    key: v6-desktop-{{ .Environment.CIRCLE_JOB }}-{{ checksum ".nvmrc" }}-{{ checksum "yarn.lock" }}
+    paths:
+      - /opt/circleci/.cache/yarn
   desktop-notify-github-success: &desktop-notify-github-success
     name: Notify Github Success
     when: on_success
@@ -659,28 +657,32 @@ jobs:
             - run:
                 name: Ensure package.json Version And Tag Match
                 command: cd desktop/bin && node validate_tag.js $VERSION
+      - run: *desktop-decrypt-assets
+      - restore_cache: *desktop-restore-source-cache
       - run:
-          name: Install Node
+          name: Install Dependencies
           command: |
+            # Install Node
+            # Note: this syntax is required to load NVM_DIR in the machine executor.
+            # Ref: https://discuss.circleci.com/t/circleci-forgetting-node-version-on-machine-executor/28813
             set +e
             set +x
             export NVM_DIR="/opt/circleci/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm install
             nvm use
-      - run:
-          name: Install Dependencies
-          command: |
-            export NVM_DIR="/opt/circleci/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm use
             npm install -g yarn
 
-            yarn install --frozen-lockfile
-      - restore_cache: *desktop-restore-source-cache
-      - run: *desktop-decrypt-assets
+            # Silence Chromedriver installation/resolution errors.
+            # Note: setting CHROMEDRIVER_* env vars in "environment" heading doesn't work.
+            export CALYPSO_DOCTOR_SKIP=true
+            yarn config set chromedriver_skip_download true
+            yarn config set chromedriver_filepath '/usr/local/bin/chromedriver'
+
+            yarn install --frozen-lockfile --cache-folder /opt/circleci/.cache/yarn
+      - save_cache: *desktop-save-source-cache
       - run:
-          name: Build Desktop Source
+          name: Build Source
           no_output_timeout: 15m
           command: |
             set +e
@@ -690,12 +692,15 @@ jobs:
             nvm use
 
             yarn run build-desktop:source
-      - save_cache: *desktop-save-source-cache
       - persist_to_workspace:
           root: /home/circleci/wp-calypso
           paths: *desktop-cache-paths
       - run: *desktop-notify-github-failure
-      - slack/status: *desktop-notify-slack-failure
+      # - slack/status: *desktop-notify-slack-failure
+      - run:
+          name: Profile Memory Usage
+          command: cat /sys/fs/cgroup/memory/memory.max_usage_in_bytes
+          when: always
 
   wp-desktop-mac:
     macos:
@@ -897,77 +902,77 @@ jobs:
 
 workflows:
   version: 2
-  calypso:
-    jobs:
-      - setup
-      - prime-calypso-live:
-          filters:
-            branches:
-              ignore: master
-      - test-full-site-editing:
-          requires:
-            - setup
-      - build-notifications:
-          requires:
-            - setup
-      - build-o2-blocks:
-          requires:
-            - setup
-      - build-wpcom-block-editor:
-          requires:
-            - setup
-      - translate:
-          requires:
-            - setup
-      - lint:
-          requires:
-            - setup
-      - test-client:
-          requires:
-            - setup
-      - test-packages:
-          requires:
-            - setup
-      - test-server:
-          requires:
-            - setup
-      - typecheck-strict:
-          requires:
-            - setup
-      - wait-calypso-live:
-          requires:
-            - test-client
-            - test-server
-          filters:
-            branches:
-              ignore:
-                # Do not spin up calypso.live for `master`
-                - master
-                # Do not spin up calypso.live for fork pull requests. Calypso.live will not build them.
-                - /pull\/[0-9]+/
-      #      - test-e2e-canary:
-      #          requires:
-      #            - wait-calypso-live
-      #          test-flags: '-C -S $CIRCLE_SHA1'
-      - test-e2e-canary:
-          name: test-e2e-canary-ie
-          requires:
-            - wait-calypso-live
-          test-flags: '-z -S $CIRCLE_SHA1'
-          test-target: 'IE11'
-          slack-webhook: '$SLACK_IE'
-      - test-e2e-canary:
-          name: test-e2e-canary-safari
-          requires:
-            - wait-calypso-live
-          test-flags: '-y -S $CIRCLE_SHA1'
-      - test-e2e-canary:
-          name: test-e2e-canary-woo
-          requires:
-            - wait-calypso-live
-          test-flags: '-W -S $CIRCLE_SHA1'
-          test-target: 'WOO'
-          slack-webhook: '$SLACK_WOO'
+  # calypso:
+  #   jobs:
+  #     - setup
+  #     - prime-calypso-live:
+  #         filters:
+  #           branches:
+  #             ignore: master
+  #     - test-full-site-editing:
+  #         requires:
+  #           - setup
+  #     - build-notifications:
+  #         requires:
+  #           - setup
+  #     - build-o2-blocks:
+  #         requires:
+  #           - setup
+  #     - build-wpcom-block-editor:
+  #         requires:
+  #           - setup
+  #     - translate:
+  #         requires:
+  #           - setup
+  #     - lint:
+  #         requires:
+  #           - setup
+  #     - test-client:
+  #         requires:
+  #           - setup
+  #     - test-packages:
+  #         requires:
+  #           - setup
+  #     - test-server:
+  #         requires:
+  #           - setup
+  #     - typecheck-strict:
+  #         requires:
+  #           - setup
+  #     - wait-calypso-live:
+  #         requires:
+  #           - test-client
+  #           - test-server
+  #         filters:
+  #           branches:
+  #             ignore:
+  #               # Do not spin up calypso.live for `master`
+  #               - master
+  #               # Do not spin up calypso.live for fork pull requests. Calypso.live will not build them.
+  #               - /pull\/[0-9]+/
+  #     #      - test-e2e-canary:
+  #     #          requires:
+  #     #            - wait-calypso-live
+  #     #          test-flags: '-C -S $CIRCLE_SHA1'
+  #     - test-e2e-canary:
+  #         name: test-e2e-canary-ie
+  #         requires:
+  #           - wait-calypso-live
+  #         test-flags: '-z -S $CIRCLE_SHA1'
+  #         test-target: 'IE11'
+  #         slack-webhook: '$SLACK_IE'
+  #     - test-e2e-canary:
+  #         name: test-e2e-canary-safari
+  #         requires:
+  #           - wait-calypso-live
+  #         test-flags: '-y -S $CIRCLE_SHA1'
+  #     - test-e2e-canary:
+  #         name: test-e2e-canary-woo
+  #         requires:
+  #           - wait-calypso-live
+  #         test-flags: '-W -S $CIRCLE_SHA1'
+  #         test-target: 'WOO'
+  #         slack-webhook: '$SLACK_WOO'
   wp-desktop:
     jobs:
       - wp-desktop-source

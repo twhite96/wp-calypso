@@ -175,9 +175,7 @@ const webpackConfig = {
 				: 'docker' !== process.env.CONTAINER,
 			parallel: isDesktop ? 2 : workerCount,
 			sourceMap: isDesktop ? false : Boolean( process.env.SOURCEMAP ),
-			terserOptions: {
-				mangle: ! isDesktop,
-			},
+			isDesktop,
 		} ),
 	},
 	module: {
