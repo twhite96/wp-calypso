@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 import { CheckoutModal, useFormStatus, useEvents, Button } from '@automattic/composite-checkout';
 import { useTranslate } from 'i18n-calypso';
+import { useSelector } from 'react-redux';
 
 /**
  * Internal dependencies
@@ -14,6 +15,8 @@ import joinClasses from './join-classes';
 import { useHasDomainsInCart } from '../hooks/has-domains';
 import { ItemVariationPicker } from './item-variation-picker';
 import { isGSuiteProductSlug } from 'lib/gsuite';
+import { currentUserHasFlag } from 'state/current-user/selectors';
+import { NON_PRIMARY_DOMAINS_TO_FREE_USERS } from 'state/current-user/constants';
 
 export function WPOrderReviewSection( { children, className } ) {
 	return <div className={ joinClasses( [ className, 'order-review-section' ] ) }>{ children }</div>;
@@ -32,7 +35,6 @@ function WPLineItem( {
 	getItemVariants,
 	onChangePlanLength,
 	isSummary,
-	isPwpoUser,
 } ) {
 	const translate = useTranslate();
 	const hasDomainsInCart = useHasDomainsInCart();
@@ -40,6 +42,9 @@ function WPLineItem( {
 	const itemSpanId = `checkout-line-item-${ item.id }`;
 	const deleteButtonId = `checkout-delete-button-${ item.id }`;
 	const [ isModalVisible, setIsModalVisible ] = useState( false );
+	const isPwpoUser = useSelector( ( state ) =>
+		currentUserHasFlag( state, NON_PRIMARY_DOMAINS_TO_FREE_USERS )
+	);
 	const modalCopy = returnModalCopy( item.type, translate, hasDomainsInCart, isPwpoUser );
 	const onEvent = useEvents();
 	const isDisabled = formStatus !== 'ready';
@@ -290,7 +295,6 @@ export function WPOrderReviewLineItems( {
 	variantSelectOverride,
 	getItemVariants,
 	onChangePlanLength,
-	isPwpoUser,
 } ) {
 	return (
 		<WPOrderReviewList className={ joinClasses( [ className, 'order-review-line-items' ] ) }>
@@ -311,7 +315,6 @@ export function WPOrderReviewLineItems( {
 								getItemVariants={ getItemVariants }
 								onChangePlanLength={ onChangePlanLength }
 								isSummary={ isSummary }
-								isPwpoUser={ isPwpoUser }
 							/>
 						</WPOrderReviewListItem>
 					);
