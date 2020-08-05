@@ -18,6 +18,7 @@ import tip from './tip';
 
 import useTyper from '../../hooks/use-typer';
 interface Props {
+	isVisible?: boolean;
 	onSubmit: () => void;
 }
 
@@ -73,7 +74,7 @@ const siteTitleExamples = shuffle( [
 	_x( 'Max’s Burger Bar', 'sample site title' ),
 ] );
 
-const SiteTitle: React.FunctionComponent< Props > = ( { onSubmit } ) => {
+const SiteTitle: React.FunctionComponent< Props > = ( { isVisible, onSubmit } ) => {
 	const { __ } = useI18n();
 	const { siteTitle } = useSelect( ( select ) => select( STORE_KEY ).getState() );
 	const { setSiteTitle } = useDispatch( STORE_KEY );
@@ -94,11 +95,15 @@ const SiteTitle: React.FunctionComponent< Props > = ( { onSubmit } ) => {
 	};
 
 	// translators: label for site title input in Gutenboarding
-	const inputLabel = __( 'My site is called' );
+	const inputLabel = __( "It's called" );
 
 	const placeHolder = useTyper( siteTitleExamples, ! siteTitle, {
 		delayBetweenCharacters: 70,
 	} );
+
+	if ( ! isVisible ) {
+		return null;
+	}
 
 	return (
 		<form
