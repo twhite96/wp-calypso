@@ -17,7 +17,7 @@ export const features = {
 };
 
 export const planCard = {
-	iconSlug: 'jetpack_business',
+	iconSlug: 'jetpack_all_in_v2',
 	productName: 'Jetpack All In',
 	subheadline: 'Complete WordPress security, performance, and growth',
 	description: 'The most powerful WordPress sites: Top-tier security bundle, enhanced search',
