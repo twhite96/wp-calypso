@@ -32,6 +32,10 @@ references:
     environment:
       CONFIG_ENV: release
       NODE_ARGS: --max_old_space_size=6144
+      CALYPSO_DOCTOR_SKIP: true
+      CHROMEDRIVER_SKIP_DOWNLOAD: true
+      DETECT_CHROMEDRIVER_VERSION: 'false'
+      CHROMEDRIVER_FILEPATH: /usr/local/bin/chromedriver
 
   setup-results-and-artifacts: &setup-results-and-artifacts
     name: Create Directories for Results and Artifacts
@@ -672,11 +676,7 @@ jobs:
             nvm use
             npm install -g yarn
 
-            yarn config set chromedriver_skip_download true
-            yarn config set chromedriver_filepath '/usr/local/bin/chromedriver'
-
             yarn install --frozen-lockfile
-      # - run: *yarn-install
       - restore_cache: *desktop-restore-source-cache
       - run: *desktop-decrypt-assets
       - run:
