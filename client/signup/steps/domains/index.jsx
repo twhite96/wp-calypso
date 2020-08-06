@@ -645,45 +645,60 @@ class DomainsStep extends React.Component {
 		);
 	}
 
-	render() {
-		if ( this.skipRender ) {
-			return null;
-		}
-
-		const { flowName, translate, sites } = this.props;
+	getBackUrl() {
+		const { translate, sites } = this.props;
 		const hasSite = Object.keys( sites ).length > 0;
-		let backUrl, backLabelText;
-
-		if ( 'transfer' === this.props.stepSectionName || 'mapping' === this.props.stepSectionName ) {
-			backUrl = getStepUrl(
-				this.props.flowName,
-				this.props.stepName,
-				'use-your-domain',
-				getLocaleSlug()
-			);
-		} else if ( this.props.stepSectionName ) {
-			backUrl = getStepUrl( this.props.flowName, this.props.stepName, undefined, getLocaleSlug() );
-		} else if ( 0 === this.props.positionInFlow && hasSite ) {
-			backUrl = '/sites/';
-			backLabelText = translate( 'Back to My Sites' );
-		}
 
 		// Override Back link if source parameter is found below
 		const backUrlSourceOverrides = {
 			'business-name-generator': '/business-name-generator',
 			domains: '/domains',
 		};
+
 		const source = get( this.props, 'queryObject.source' );
 
-		let isExternalBackUrl;
-
-		if ( backUrlSourceOverrides[ source ] ) {
-			backUrl = backUrlSourceOverrides[ source ];
-			backLabelText = translate( 'Back' );
-
-			// Solves route conflicts between LP and calypso (ex. /domains).
-			isExternalBackUrl = true;
+		if ( source && backUrlSourceOverrides[ source ] ) {
+			return {
+				backUrl: backUrlSourceOverrides[ source ],
+				backLabelText: translate( 'Back' ),
+				isExternalBackUrl: true, // Solves route conflicts between LP and calypso (ex. /domains).
+			};
 		}
+
+		if ( 'transfer' === this.props.stepSectionName || 'mapping' === this.props.stepSectionName ) {
+			return {
+				backUrl: getStepUrl(
+					this.props.flowName,
+					this.props.stepName,
+					'use-your-domain',
+					getLocaleSlug()
+				),
+			};
+		}
+
+		if ( this.props.stepSectionName ) {
+			return {
+				backUrl: getStepUrl( this.props.flowName, this.props.stepName, undefined, getLocaleSlug() ),
+			};
+		}
+
+		if ( 0 === this.props.positionInFlow && hasSite ) {
+			return {
+				backUrl: '/sites/',
+				backLabelText: translate( 'Back to My Sites' ),
+			};
+		}
+
+		return {};
+	}
+
+	render() {
+		if ( this.skipRender ) {
+			return null;
+		}
+
+		const { flowName, translate } = this.props;
+		const { backUrl, backLabelText, isExternalBackUrl = false } = this.getBackUrl();
 
 		const headerText = this.getHeaderText();
 		const fallbackSubHeaderText = this.getSubHeaderText();
@@ -694,7 +709,7 @@ class DomainsStep extends React.Component {
 				flowName={ this.props.flowName }
 				stepName={ this.props.stepName }
 				backUrl={ backUrl }
-				externalBackUrl={ isExternalBackUrl }
+				isExternalBackUrl={ isExternalBackUrl }
 				positionInFlow={ this.props.positionInFlow }
 				headerText={ headerText }
 				subHeaderText={ fallbackSubHeaderText }
