@@ -159,6 +159,8 @@ const webpackConfig = {
 	},
 	optimization: {
 		concatenateModules: ! isDevelopment && shouldConcatenateModules,
+		removeAvailableModules: ! isDesktop,
+		removeEmptyChunks: ! isDesktop,
 		splitChunks: {
 			chunks: 'all',
 			name: !! ( isDevelopment || shouldEmitStats ),
