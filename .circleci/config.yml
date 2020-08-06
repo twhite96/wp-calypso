@@ -234,10 +234,10 @@ references:
   desktop-restore-packages-cache: &desktop-restore-packages-cache
     name: Restore desktop packages cache
     keys:
-      - v7-desktop-{{ .Environment.CIRCLE_JOB }}-{{ .Environment.PACKAGES_HASH }}
+      - v7-desktop-{{ .Environment.CIRCLE_JOB }}-{{ checksum "packages-hash" }}
   desktop-save-packages-cache: &desktop-save-packages-cache
     name: Save desktop packages cache
-    key: v7-desktop-{{ .Environment.CIRCLE_JOB }}-{{ .Environment.PACKAGES_HASH }}
+    key: v7-desktop-{{ .Environment.CIRCLE_JOB }}-{{ checksum "packages-hash" }}
     paths:
       - packages
       - packages-hash
@@ -671,8 +671,7 @@ jobs:
       - run:
           name: Calculate Packages Cache Key
           command: |
-            echo 'export PACKAGES_HASH=$(find ./packages -type f -exec md5sum {} \; | md5sum | cut -d" " -f1)' >> $BASH_ENV
-            source $BASH_ENV
+            echo '$(find ./packages -type f -exec md5sum {} \; | md5sum | cut -d" " -f1)' > packages-hash
       - restore_cache: *desktop-restore-yarn-cache
       - restore_cache: *desktop-restore-packages-cache
       - run:
@@ -695,9 +694,9 @@ jobs:
             yarn config set chromedriver_skip_download true
             yarn config set chromedriver_filepath '/usr/local/bin/chromedriver'
 
-            if [ "$(cat packages-hash)" != "$PACKAGES_HASH" ]; then
+            export CURRENT_PACKAGES_HASH=$(find ./packages -type f -exec md5sum {} \; | md5sum | cut -d" " -f1)
+            if [ "$(cat packages-hash)" != "$CURRENT_PACKAGES_HASH" ]; then
               yarn install --frozen-lockfile --cache-folder /opt/circleci/.cache/yarn
-              echo "$PACKAGES_HASH" > packages-hash
             fi
       - save_cache: *desktop-save-packages-cache
       - save_cache: *desktop-save-yarn-cache
