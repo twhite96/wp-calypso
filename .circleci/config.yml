@@ -693,7 +693,7 @@ jobs:
             export CURRENT_PACKAGES_HASH=$(find ./packages -type f -exec md5sum {} \; | md5sum | cut -d" " -f1)
             if [ "$(cat packages-hash)" != "$CURRENT_PACKAGES_HASH" ]; then
               yarn install --frozen-lockfile --cache-folder /opt/circleci/.cache/yarn
-              echo "$CURRENT_PACKAGES_HASH" > packages-hash
+              echo $(find ./packages -type f -exec md5sum {} \; | md5sum | cut -d" " -f1) > packages-hash
             fi
       - save_cache: *desktop-save-packages-cache
       - save_cache: *desktop-save-yarn-cache
