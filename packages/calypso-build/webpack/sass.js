@@ -1,8 +1,14 @@
 /**
  * External dependencies
  */
+const path = require( 'path' );
 const MiniCssExtractPluginWithRTL = require( '@automattic/mini-css-extract-plugin-with-rtl' );
 const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
+
+/**
+ * Internal variables
+ */
+const defaultCacheDirectory = path.resolve( process.env.HOME, '.cache', 'webpack' );
 
 /**
  * Return a webpack loader object containing our styling (Sass -> CSS) stack.
@@ -18,6 +24,14 @@ module.exports.loader = ( { includePaths, prelude, postCssConfig = {} } ) => ( {
 	test: /\.(sc|sa|c)ss$/,
 	use: [
 		MiniCssExtractPluginWithRTL.loader,
+		{
+			loader: require.resolve( 'cache-loader' ),
+			options: {
+				cacheDirectory: process.env.CIRCLECI
+					? '/opt/circleci/.cache/webpack'
+					: defaultCacheDirectory,
+			},
+		},
 		{
 			loader: require.resolve( 'css-loader' ),
 			options: {

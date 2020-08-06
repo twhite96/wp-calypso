@@ -231,6 +231,7 @@ references:
     key: v6-desktop-{{ .Environment.CIRCLE_JOB }}-{{ checksum ".nvmrc" }}-{{ checksum "yarn.lock" }}
     paths:
       - /opt/circleci/.cache/yarn
+      - /opt/circleci/.cache/webpack
   desktop-notify-github-success: &desktop-notify-github-success
     name: Notify Github Success
     when: on_success
@@ -680,7 +681,6 @@ jobs:
             yarn config set chromedriver_filepath '/usr/local/bin/chromedriver'
 
             yarn install --frozen-lockfile --cache-folder /opt/circleci/.cache/yarn
-      - save_cache: *desktop-save-source-cache
       - run:
           name: Build Source
           no_output_timeout: 15m
@@ -692,6 +692,7 @@ jobs:
             nvm use
 
             yarn run build-desktop:source
+      - save_cache: *desktop-save-source-cache
       - persist_to_workspace:
           root: /home/circleci/wp-calypso
           paths: *desktop-cache-paths

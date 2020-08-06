@@ -1,4 +1,5 @@
 const path = require( 'path' );
+const defaultCacheDirectory = path.resolve( process.env.HOME, '.cache', 'webpack' );
 
 module.exports = {
 	entry: './src/public-api.js',
@@ -13,7 +14,18 @@ module.exports = {
 			},
 			{
 				test: /\.css$/,
-				use: [ 'style-loader', 'css-loader' ],
+				use: [
+					{
+						loader: 'cache-loader',
+						options: {
+							cacheDirectory: process.env.CIRCLECI
+								? '/opt/circleci/.cache/webpack'
+								: defaultCacheDirectory,
+						},
+					},
+					'style-loader',
+					'css-loader',
+				],
 			},
 		],
 	},
